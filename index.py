@@ -2,12 +2,9 @@ from dash import dcc
 from dash import html
 from dash.dependencies import Input, Output
 import dash_bootstrap_components as dbc
-
-
 # Connect to main app.py file
 from app import app
 from app import server
-
 # Connect to your app pages
 from apps import real_time, assignment, analysis
 

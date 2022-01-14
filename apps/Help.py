@@ -5,7 +5,7 @@ import pandas as pd
 import numpy as np
 from sklearn.cluster import KMeans
 from sklearn.metrics import silhouette_score, adjusted_rand_score, davies_bouldin_score, calinski_harabasz_score, \
-    v_measure_score, fowlkes_mallows_score, silhouette_samples
+                            v_measure_score, fowlkes_mallows_score, silhouette_samples
 import umap.umap_ as umap
 from sklearn import metrics
 from wordcloud import WordCloud
@@ -16,6 +16,14 @@ import nltk
 from nltk import WordNetLemmatizer
 from sklearn.feature_extraction.text import TfidfVectorizer, ENGLISH_STOP_WORDS
 import re
+from dash import dcc
+from dash import html
+import dash_bootstrap_components as dbc
+import io
+import torch
+import pathlib
+import plotly.graph_objects as go
+
 
 nltk.download('omw-1.4')
 
@@ -271,6 +279,7 @@ def fig_to_uri(in_fig, close_all=True, **save_args):
     encoded = base64.b64encode(out_img.read()).decode("ascii").replace("\n", "")
     return "data:image/png;base64,{}".format(encoded)
 
+
 def wordcloud_one_cluster(dataframe, my_cluster, max_words=200):
     if dataframe.shape[0] == 5:
         vertical = 1
@@ -314,14 +323,61 @@ def generate_wordcloud_one_cluster(df, cluster, MAX_WORDS_WORDCLOUD=100, MAX_FEA
 
 
 def fact_checking_assignment(embedding_df, embedding_fact_checker, dataset, n_clusters=5):
-
     embedding = np.concatenate([embedding_df, embedding_fact_checker], axis=0)
     umap_emb = dim_reduction(embedding)
-    model = KMeans(n_clusters= n_clusters, init='k-means++', n_init=1)
+    model = KMeans(n_clusters=n_clusters, init='k-means++', n_init=1)
     cluster_labels = model.fit_predict(umap_emb)
     my_cluster = cluster_labels[-1]
-    dff = df.copy()
+    dff = dataset.copy()
     dff["cluster_labels"] = cluster_labels[:-1]
-    fig = generate_wordcloud_one_cluster(x, my_cluster, MAX_WORDS_WORDCLOUD =100, MAX_FEATURES = None, MIN_DF = 0.4, doc_term_matrix = None, vectorizer = None)
+    fig = generate_wordcloud_one_cluster(dff, my_cluster, MAX_WORDS_WORDCLOUD=100, MAX_FEATURES=None, MIN_DF=0.4,
+                                         doc_term_matrix=None, vectorizer=None)
 
-    return int(my_cluster), dff[dff.cluster_labels == my_cluster], fig
+    return int(my_cluster), dff[dff.cluster_labels == my_cluster], fig_to_uri(fig, bbox_inches="tight")
+
+
+def parse_contents(contents, filename):
+    if contents is not None:
+        content_type, content_string = contents.split(',')
+
+        decoded = base64.b64decode(content_string)
+        try:
+            if 'csv' in filename:
+                # Assume that the user uploaded a CSV file
+                temp = pd.read_csv(
+                    io.StringIO(decoded.decode('utf-8', errors='ignore')))
+            elif 'xls' in filename:
+                # Assume that the user uploaded an excel file
+                temp = pd.read_excel(io.BytesIO(decoded))
+        except Exception as e:
+            print(e)
+            return html.Div([
+                'There was an error processing this file.'
+            ])
+        PATH = pathlib.Path(__file__).parent
+        DATA_PATH = PATH.joinpath("../datasets").resolve()
+
+        embeddings = torch.load(DATA_PATH.joinpath("embeddings_example.pt"))
+        embeddings_fact_checker = torch.load(DATA_PATH.joinpath("fact_checker_embeddings_example.pt"))
+        df = pd.read_csv(DATA_PATH.joinpath("example_dataset.csv"))
+        global my_data
+        my_cluster, my_data, my_fig = fact_checking_assignment(embeddings, embeddings_fact_checker, df, n_clusters=5)
+        plot_number = go.Figure(go.Indicator(value=my_cluster, title="You have been assigned to cluster number"))
+
+        return html.Div([
+            dbc.Row([
+                dbc.Col(dcc.Graph(id='my_number', figure=plot_number), width=6),
+                dbc.Col([
+                    html.H5("Cluster Explanability"),
+                    html.Img(id='my_wordcloud', src=my_fig, width="100%")
+                ],
+                    width=6,
+                    align="center")
+            ]),
+            dbc.Row([
+                html.Button("Download CSV", id="btn_csv"),
+            ])
+        ])
+
+    else:
+        return [()]
