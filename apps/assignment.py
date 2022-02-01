@@ -36,15 +36,33 @@ CSV_LOADER = dcc.Upload(
     multiple=False
 )
 
-layout = html.Div([
+TEXT = html.Div([
+    html.H1('Page description'),
+    html.Div([
+        html.P("The fact checker can now input its profile (a csv file with all the articles he has written, and all"
+               " the tweets he has worked on). Based on that and the document dropped in the page"
+               " 'Tweets analysis', the fact checker will be assigned a specific cluster (the one that is the most"
+               " related to its knowledge). You can try this page by putting a fake csv file (one is already "
+               "downloaded in the app for demonstration purposes). It returns a csv file with all the tweets assigned"
+               " to the fact checker."
+               )
+    ])
+])
+
+BODY = dbc.Container([
+    dbc.Row([
+        dbc.Col(TEXT, width=12)
+    ], style={"marginTop": 30}),
     dbc.Row([
         dbc.Col(CSV_LOADER, width=12)
-    ]),
+    ], style={"marginTop": 30}),
     dcc.Loading(
         html.Div(id='output-users')
     ),
     dcc.Download(id="download-dataframe-csv")
-])
+], className="mt-12")
+
+layout = html.Div([BODY])
 
 
 @app.callback(

@@ -9,6 +9,7 @@ import pathlib
 from app import app
 import pickle
 import dash_bootstrap_components as dbc
+
 # from apps.Help import dim_reduction, TFIDF_emb, run_fc, score_table
 
 # get relative data folder
@@ -46,9 +47,8 @@ DATA_PATH = PATH.joinpath("../datasets").resolve()
 # for a faster implementation we will directly load the files
 scores_bert = pd.read_csv(DATA_PATH.joinpath("scores_bert.csv"))
 scores_tfidf = pd.read_csv(DATA_PATH.joinpath("scores_tfidf.csv"))
-with open(DATA_PATH.joinpath("wordcloud_urls"), "rb") as fp:   # Unpickling
+with open(DATA_PATH.joinpath("wordcloud_urls"), "rb") as fp:  # Unpickling
     wordcloud_urls = pickle.load(fp)
-
 
 SBert_cluster = [
     dbc.CardHeader(html.H5("SBert clustering")),
@@ -60,14 +60,14 @@ SBert_cluster = [
                     dbc.Row(
                         [
                             dbc.Col(
-                                [   html.P("Metrics depending on the number of clusters"),
-                                    dash_table.DataTable(
-                                        id='table',
-                                        columns=[{"name": i, "id": i} for i in scores_bert.columns],
-                                        data=scores_bert.to_dict('records'),
-                                        style_table={'overflowX': 'auto'}
-                                    )
-                                ],
+                                [html.P("Metrics depending on the number of clusters"),
+                                 dash_table.DataTable(
+                                     id='table',
+                                     columns=[{"name": i, "id": i} for i in scores_bert.columns],
+                                     data=scores_bert.to_dict('records'),
+                                     style_table={'overflowX': 'auto'}
+                                 )
+                                 ],
                                 md=12
                             )
                         ]
@@ -78,12 +78,12 @@ SBert_cluster = [
                                 [
                                     html.P("Choose the appropriate number of clusters"),
                                     dcc.Slider(
-                                                id='slider_ncluster',
-                                                min=4,
-                                                max=10,
-                                                marks={str(i): str(i) for i in [i for i in range(4, 11)]},
-                                                value=4),
-                                    html.Img(id='wordcloud_image_SBert', src="", width = "100%")
+                                        id='slider_ncluster',
+                                        min=4,
+                                        max=10,
+                                        marks={str(i): str(i) for i in [i for i in range(4, 11)]},
+                                        value=4),
+                                    html.Img(id='wordcloud_image_SBert', src="", width="100%")
                                 ],
                                 md=12,
                             ),
@@ -109,14 +109,14 @@ TFIDF_cluster = [
                     dbc.Row(
                         [
                             dbc.Col(
-                                [   html.P("Metrics depending on the number of clusters"),
-                                    dash_table.DataTable(
-                                        id='table',
-                                        columns=[{"name": i, "id": i} for i in scores_tfidf.columns],
-                                        data=scores_tfidf.to_dict('records'),
-                                        style_table={'overflowX': 'auto'}
-                                    )
-                                ],
+                                [html.P("Metrics depending on the number of clusters"),
+                                 dash_table.DataTable(
+                                     id='table',
+                                     columns=[{"name": i, "id": i} for i in scores_tfidf.columns],
+                                     data=scores_tfidf.to_dict('records'),
+                                     style_table={'overflowX': 'auto'}
+                                 )
+                                 ],
                                 md=12
                             )
                         ]
@@ -127,12 +127,12 @@ TFIDF_cluster = [
                                 [
                                     html.P("Choose the appropriate number of clusters"),
                                     dcc.Slider(
-                                                id='slider_ncluster_tfidf',
-                                                min=4,
-                                                max=10,
-                                                marks={str(i): str(i) for i in [i for i in range(4, 11)]},
-                                                value=4),
-                                    html.Img(id='wordcloud_image_TFIDF', src="", width = "100%")
+                                        id='slider_ncluster_tfidf',
+                                        min=4,
+                                        max=10,
+                                        marks={str(i): str(i) for i in [i for i in range(4, 11)]},
+                                        value=4),
+                                    html.Img(id='wordcloud_image_TFIDF', src="", width="100%")
                                 ],
                                 md=12,
                             ),
@@ -149,35 +149,51 @@ TFIDF_cluster = [
 ]
 
 MY_LOADER = dcc.Upload(
-        id='upload-data',
-        children=html.Div([
-            'Drag and Drop or ',
-            html.A('Select Files')
-        ]),
-        style={
-            'width': '100%',
-            'height': '60px',
-            'lineHeight': '60px',
-            'borderWidth': '1px',
-            'borderStyle': 'dashed',
-            'borderRadius': '5px',
-            'textAlign': 'center',
-            'margin': '10px'
-        },
-        # Allow multiple files to be uploaded
-        multiple=False
-    )
+    id='upload-data',
+    children=html.Div([
+        'Drag and Drop or ',
+        html.A('Select Files')
+    ]),
+    style={
+        'width': '100%',
+        'height': '60px',
+        'lineHeight': '60px',
+        'borderWidth': '1px',
+        'borderStyle': 'dashed',
+        'borderRadius': '5px',
+        'textAlign': 'center',
+        'margin': '10px'
+    },
+    # Allow multiple files to be uploaded
+    multiple=False
+)
 
+TEXT = html.Div([
+    html.H1('App description'),
+    html.Div([
+        html.P("This application is just a demo. The purpose of this page is to cluster the different tweets."
+               " The fact checker can analyse the different clusters and find out what is the best clustering method"
+               " for what he wants to achieve. How does it work? The fact checker upload its csv file with one column "
+               "and each row corresponding to a single tweet. Then we will display the metrics for the different "
+               "clustering configurations "
+               "alongside data visualizations for clustering explainability. Based on that, the fact checker can "
+               "choose what is the best configuration for its use case. Here, we "
+               "already calculated the two clustering configurations because without a gpu it takes too much time to "
+               "compute SBert's embeddings. "
+               )
+    ])
+])
 
 BODY = dbc.Container(
-    [
-        dbc.Row([dbc.Col(MY_LOADER),], style={"marginTop": 30}),
-        dbc.Row([dbc.Col(dbc.Card(SBert_cluster)),], style={"marginTop": 30}),
-        dbc.Row([dbc.Col(dbc.Card(TFIDF_cluster)),], style={"marginTop": 30}),
-    ],
+    [dbc.Row([dbc.Col(TEXT)], align="center", style={"marginTop": 30}),
+     dbc.Row([dbc.Col(MY_LOADER), ], style={"marginTop": 30}),
+     dbc.Row([dbc.Col(dbc.Card(SBert_cluster)), ], style={"marginTop": 30}),
+     dbc.Row([dbc.Col(dbc.Card(TFIDF_cluster)), ], style={"marginTop": 30}),
+     ],
     className="mt-12",
 )
 layout = html.Div([BODY])
+
 
 # layout = html.Div([
 #     html.H1('Twitter Disinformation analysis'),
@@ -202,6 +218,7 @@ layout = html.Div([BODY])
     Input('slider_ncluster', 'value'))
 def update_figure(n_cluster):
     return wordcloud_urls[n_cluster]
+
 
 @app.callback(
     Output('wordcloud_image_TFIDF', 'src'),

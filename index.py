@@ -6,7 +6,7 @@ import dash_bootstrap_components as dbc
 from app import app
 from app import server
 # Connect to your app pages
-from apps import real_time, assignment, analysis
+from apps import real_time, assignment, analysis, evaluation
 
 NAVBAR = dbc.NavbarSimple(
     children=[
@@ -25,7 +25,7 @@ NAVBAR = dbc.NavbarSimple(
         dbc.NavItem(
             dbc.NavLink(
                 "Real Time tweets analysis",
-                href='/apps/assignment',
+                href='/apps/real_time',
             )
         ),
     ],
@@ -50,7 +50,9 @@ def display_page(pathname):
     if pathname == '/apps/assignment':
         return assignment.layout
     if pathname == '/apps/real_time':
-        return assignment.layout
+        return real_time.layout
+    if pathname == '/apps/evaluation':
+        return evaluation.layout
     else:
         return assignment.layout
 

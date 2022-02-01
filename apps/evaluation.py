@@ -13,10 +13,9 @@ import dash_bootstrap_components as dbc
 TEXT = html.Div([
     html.H1('Work in progress'),
     html.Div([
-        html.P("Basically, the idea is that a fact checker could decide to follow a specific hashtag on twitter,"
-               " and the app will send an email to the fact checker if the tweets is highly similar to one of the"
-               "clusters he has been assigned to. On this page the fact checker will log in and enter"
-               " the hashtags he wants to follow."
+        html.P("We will use this page to evaluate the performance of our fact checking assignment."
+               " We will compare the results of our clustering assignments with what the fact checkers"
+               " would have decided to be assigned to. "
                )
     ])
 ])
