@@ -5,5 +5,5 @@
 * git clone the repo
 * create a new environment
 * pip install requirements.txt
-* python index.py
+* run on terminal: python index.py
 * Go to the following url and the app will appear http://127.0.0.1:8050/apps/analysis
